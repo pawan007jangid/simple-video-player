@@ -1,0 +1,203 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+<link href="simple-video-player.css" rel="stylesheet" />
+
+<!-- Video HTML -->
+<div id="video-slider">
+   
+    <div id="video-viewport" class="principal-welcome">
+        <div class="video-wrapper">
+            <div class="black-fade">&nbsp;</div>
+            <!--  video banner area  -->
+         <video width="1920" height="1080" id="myVideo-1" poster="poster.png">
+                <source src="video-1.mp4" type="video/mp4">
+                    
+                        <p>Your browser does not support the video tag.</p>
+            </video>
+            
+        </div>
+		<div class="video-btn-holder">
+                <button onclick="vidplay(1)" class="btn btn-play btn-md"><em id="video-i-1" class="fa fa-play">&nbsp;</em> <span id="play-1"></span> </button>
+                <div id="defaultBar">
+                    <div id="progressBar">&nbsp;</div>
+                </div>
+                <button onclick="vidmute(1)" id="button-mute-1" class="btn btn-mute btn-lg mute"><em id="mute-i-1" class="glyphicon glyphicon-volume-off">&nbsp;</em><span id="mute-1"></span> </button>
+        </div>
+    </div>
+</div>
+
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script>
+function toHHMMSS(str){
+    var sec_num = parseInt(str, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    var time    = minutes+':'+seconds;
+    return time;
+}
+
+
+ 
+//Video script
+
+var min_w = 300; // minimum video width allowed
+var vid_w_orig;  // original video dimensions
+var vid_h_orig;
+
+//Use document.getElementById to get video
+var video1 = document.getElementById("myVideo-1");
+
+//Scale video
+$(document).ready(function(){// runs after DOM has loaded
+
+	 $('#video-slider').width($(window).width());
+	 $('#video-slider').height($(window).height());	 
+	 $('#video-slider .prev-next-button').css({top:$(window).height()/2});
+	if($('#defaultBar').length){
+		$('#defaultBar').after('<div id="timeWrap"><span class="currentTime">00:00</span> / <span class="duration">00:00</span></div>'); 
+	}
+	$(window).resize(function () { resizeToCover(); });
+	if($('#video-slider').length || $('body').hasClass('gallery_bg')){
+		$(window).trigger('resize');
+	}
+});
+
+function resizeToCover() {
+   vid_w_orig = parseInt(jQuery('video').attr('width'));
+    vid_h_orig = parseInt(jQuery('video').attr('height'));
+    // set the video viewport to the window size
+    jQuery('#video-viewport').width(jQuery(window).width());
+    jQuery('#video-viewport').height(jQuery(window).height());
+ 
+ 	 $('#video-slider .prev-next-button').css({top:$(window).height()/2});
+    // use largest scale factor of horizontal/vertical
+    var scale_h = jQuery(window).width() / vid_w_orig;
+    var scale_v = jQuery(window).height() / vid_h_orig;
+    var scale = scale_h > scale_v ? scale_h : scale_v;
+
+
+    // don't allow scaled width < minimum video width
+    if (scale * vid_w_orig < min_w) {scale = min_w / vid_w_orig;};
+
+    // now scale the video
+    jQuery('video').width(scale * vid_w_orig);
+    jQuery('video').height(scale * vid_h_orig);
+ 
+    // and center it by scrolling the video viewport
+    jQuery('#video-viewport').scrollLeft((jQuery('video').width() - jQuery(window).width()) / 2);
+    jQuery('#video-viewport').scrollTop((jQuery('video').height() - jQuery(window).height()) / 2);
+    
+   
+
+};
+
+//function plays video on click of play button
+function vidplay(i) {
+   var video = document.getElementById("myVideo-"+i);
+   var button = document.getElementById("play-"+i);
+   var icon =  document.getElementById("video-i-"+i);
+   var buttonMute = document.getElementById("button-mute-"+i);
+   //video.muted=true;
+   if (video.paused) {
+   video.play();
+   icon.setAttribute('class','fa fa-pause');
+   $('#timeWrap .currentTime').html(toHHMMSS('0'));
+		$('#timeWrap .duration').html(toHHMMSS(myMovie.duration));
+		$('#timeWrap').css({'display':'inline-block'});
+   buttonMute.style.display = 'block';
+   
+   //progress bar
+   updateBar=setInterval(update, 500);
+   
+       
+   } else {
+   video.pause();
+   
+	window.clearInterval(updateBar);
+   
+	
+   icon.setAttribute('class','fa fa-play');
+   buttonMute.style.display = 'none';
+   
+   }
+   video.addEventListener('ended', function() {
+											
+      video.currentTime = '0';
+	  video.pause();
+	   icon.setAttribute('class','fa fa-play');
+	   buttonMute.style.display = 'none';
+       
+  }, false);
+   
+}
+
+//function to mute/unmute
+function vidmute(i) {
+   var video = document.getElementById("myVideo-"+i);
+   //var buttonText = document.getElementById("mute-"+i);
+   var icon =  document.getElementById("mute-i-"+i);
+   
+   
+   if (video.muted) {
+   video.muted=false;
+    icon.setAttribute('class','glyphicon glyphicon-volume-up');
+   } 
+    else{
+   video.muted=true;
+   icon.setAttribute('class','glyphicon glyphicon-volume-off');
+   
+   }
+}
+function doFirst(){
+	
+	myMovie=document.getElementById('myVideo-1');
+	bar=document.getElementById('defaultBar');
+	
+	barSize=337;
+	
+	progressBar=document.getElementById('progressBar');
+	$('.video-btn-holder').show();
+	//playButton.addEventListener('click', playOrPause, false);
+    try {
+        bar.addEventListener('click', clickedBar, false);
+    }
+    catch(err) {
+        
+    }
+    
+}
+
+
+
+function update() {
+	if (!myMovie.ended) {
+		var size=parseInt(myMovie.currentTime*barSize/myMovie.duration);
+		progressBar.style.width=size+'px';
+        
+		$('#timeWrap .currentTime').html(toHHMMSS(myMovie.currentTime));
+		$('#timeWrap .duration').html(toHHMMSS(myMovie.duration));
+	} else {
+		progressBar.style.width='0px';
+		window.clearInterval(updateBar);
+	}
+}
+
+function clickedBar(e){
+		if(!myMovie.ended){
+		var mouseX=e.pageX-$(bar).offset().left;
+		var newtime=mouseX*myMovie.duration/barSize;
+		myMovie.currentTime=newtime;
+		progressBar.style.width=mouseX+'px';
+	}
+}
+
+
+	window.addEventListener('load',doFirst,false);
+
+</script>
